@@ -11,11 +11,8 @@ namespace RecipeTree.Processes
 {
     class TreeBuilder
     {
-        public static List<(string, bool)> MakeTree(string[] itemWords, Player player, int textSetting)
+        public static List<(string, bool)> MakeTree(string itemToFind, Player player, int textSetting)
         {
-            // Join the string array to create a space seperated string
-            string itemToFind = String.Join(" ", itemWords);
-
             // Dictionary to contain all possible recipes for one item -> {recipeOBJ: [(item name, stack size), ...], ...}
             Dictionary<Recipe, List<(int, string, int)>> recipeItems = GetRecipes(itemToFind);
 
