@@ -49,6 +49,8 @@ namespace RecipeTree.Commands
             else
             {
                 TreeWindow.Visible = true;
+                string itemName = String.Join(" ", args.Skip(1));
+                ItemHolder.SetImg(Int32.Parse(ItemChecker.GetItemID(itemName)));
             }
             
             

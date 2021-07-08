@@ -34,7 +34,7 @@ namespace RecipeTree.Processes
                     foreach(var v in recipe.Value)
                     {
                         // Chekcs to see if the player has the required item in their inventory
-                        if (!InventoryChecker.CheckItem(player, v.Item2, v.Item3))
+                        if (!ItemChecker.CheckInventory(player, v.Item2, v.Item3))
                         {
                             // if the player doesn't have one of any of the required items, they cannot craft and therefore the loop breaks
                             playerCanCraft = false;
