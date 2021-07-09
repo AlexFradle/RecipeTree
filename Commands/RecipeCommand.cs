@@ -50,7 +50,7 @@ namespace RecipeTree.Commands
             {
                 TreeWindow.Visible = true;
                 string itemName = String.Join(" ", args.Skip(1));
-                ItemHolder.SetImg(Int32.Parse(ItemChecker.GetItemID(itemName)));
+                ItemHolder.SetImg(ItemChecker.GetItemID(itemName));
             }
             
             

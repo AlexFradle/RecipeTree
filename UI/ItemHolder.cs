@@ -12,10 +12,12 @@ namespace RecipeTree.UI
     class ItemHolder : UIPanel
     {
         private static UIImage itemImg;
+        private static Item currentItem;
 
-        public static void SetImg(int newItemID)
+        public static void SetImg(Item newItem)
         {
-            itemImg.SetImage(Main.itemTexture[newItemID]);
+            currentItem = newItem;
+            itemImg.SetImage(Main.itemTexture[newItem.netID]);
         }
 
         public override void OnInitialize()
@@ -26,9 +28,13 @@ namespace RecipeTree.UI
             Append(itemImg);
         }
 
-        public override void Update(GameTime gameTime)
+        public override void Draw(SpriteBatch spriteBatch)
         {
-            base.Update(gameTime);
+            base.Draw(spriteBatch);
+            if (IsMouseHovering)
+            {
+                Main.hoverItemName = currentItem.Name;
+            }
         }
     }
 }

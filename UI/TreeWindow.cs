@@ -24,8 +24,8 @@ namespace RecipeTree.UI
 
             float TPLeft = 400;
             float TPTop = 100;
-            float TPWidth = 170;
-            float TPHeight = 70;
+            float TPWidth = 300;
+            float TPHeight = 500;
 
             TreePanel.Left.Set(TPLeft, 0f);
             TreePanel.Top.Set(TPTop, 0f);
@@ -38,8 +38,8 @@ namespace RecipeTree.UI
 
             ItemPanel.Left.Set(10f, 0f);
             ItemPanel.Top.Set(10f, 0f);
-            ItemPanel.Width.Set(40f, 0f);
-            ItemPanel.Height.Set(40f, 0f);
+            ItemPanel.Width.Set(50f, 0f);
+            ItemPanel.Height.Set(50f, 0f);
             ItemPanel.BackgroundColor = new Color(10, 29, 94);
             TreePanel.Append(ItemPanel);
 

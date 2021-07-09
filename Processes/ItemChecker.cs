@@ -26,7 +26,7 @@ namespace RecipeTree.Processes
             return false;
         }
 
-        public static string GetItemID(string item)
+        public static Item GetItemID(string itemStr)
         {
             // Currently only works for vanilla items
 
@@ -58,17 +58,19 @@ namespace RecipeTree.Processes
             // 2. Check if the field with the requested string exists
             // 3. If it does exist, get the value of the field using the GetField and GetValue methods
 
-            string itemName = String.Concat(item.Where(x => !Char.IsWhiteSpace(x)));
+            Item item = new Item();
+            string itemName = String.Concat(itemStr.Where(x => !Char.IsWhiteSpace(x)));
             if (typeof(ItemID).GetField(itemName) != null)
             {
                 var id = typeof(ItemID).GetField(itemName).GetValue(null);
+                item.SetDefaults(Int32.Parse(id.ToString()), false);
 
-                // Have to convert to string because apparently id is an objcet, so im gonna convert back int to send to the ItemHolder
-                return id.ToString();
+                return item;
             }
             //----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-            return "1";
+            item.SetDefaults(1, false);
+            return item;
         }
     }
 }
