@@ -14,8 +14,11 @@ namespace RecipeTree.UI
 {
     class TreeWindow : UIState
     {
-        public BaseUIPanel TreePanel;
+        public static BaseUIPanel TreePanel;
         public static bool Visible;
+        public static ItemHolder ItemPanel;
+        public static TreeDisplayArea TreeArea;
+        public static HoverImageButton CloseButton;
 
         public override void OnInitialize()
         {
@@ -24,7 +27,7 @@ namespace RecipeTree.UI
 
             float TPLeft = 400;
             float TPTop = 100;
-            float TPWidth = 300;
+            float TPWidth = 500;
             float TPHeight = 500;
 
             TreePanel.Left.Set(TPLeft, 0f);
@@ -33,7 +36,7 @@ namespace RecipeTree.UI
             TreePanel.Height.Set(TPHeight, 0f);
             TreePanel.BackgroundColor = new Color(73, 94, 171);
 
-            ItemHolder ItemPanel = new ItemHolder();
+            ItemPanel = new ItemHolder();
             ItemPanel.SetPadding(0);
 
             ItemPanel.Left.Set(10f, 0f);
@@ -46,13 +49,20 @@ namespace RecipeTree.UI
 
             // image is 22s22
             Texture2D closeButtonTexture = ModContent.GetTexture("Terraria/UI/ButtonDelete");
-            HoverImageButton closeButton = new HoverImageButton(closeButtonTexture, Language.GetTextValue("LegacyInterface.52"));
-            closeButton.Left.Set(TPWidth - 22 - 10, 0f);
-            closeButton.Top.Set(10, 0f);
-            closeButton.Width.Set(22, 0f);
-            closeButton.Height.Set(22, 0f);
-            closeButton.OnClick += new MouseEvent(CloseButtonClicked);
-            TreePanel.Append(closeButton);
+            CloseButton = new HoverImageButton(closeButtonTexture, Language.GetTextValue("LegacyInterface.52"));
+            CloseButton.Left.Set(TPWidth - 22 - 10, 0f);
+            CloseButton.Top.Set(10, 0f);
+            CloseButton.Width.Set(22, 0f);
+            CloseButton.Height.Set(22, 0f);
+            CloseButton.OnClick += new MouseEvent(CloseButtonClicked);
+            TreePanel.Append(CloseButton);
+
+            TreeArea = new TreeDisplayArea();
+            TreeArea.SetPadding(0);
+            TreeArea.Left.Set(10f, 0f);
+            TreeArea.Top.Set(70f, 0f);
+            TreeArea.BackgroundColor = new Color(0, 255, 0);
+            TreePanel.Append(TreeArea);
 
             Append(TreePanel);
         }

@@ -11,16 +11,16 @@ namespace RecipeTree.UI
 {
     class ItemHolder : UIPanel
     {
-        private static UIImage itemImg;
-        private static Item currentItem;
+        private UIImage itemImg = new UIImage(ModContent.GetTexture("Terraria/UI/ButtonDelete"));
+        private Item currentItem;
 
-        public static void SetImg(Item newItem)
+        public void SetImg(Item newItem)
         {
             currentItem = newItem;
             itemImg.SetImage(Main.itemTexture[newItem.netID]);
         }
 
-        public override void OnInitialize()
+        public ItemHolder()
         {
             itemImg = new UIImage(ModContent.GetTexture("Terraria/UI/ButtonFavoriteActive"));
             itemImg.VAlign = 0.5f;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.IO;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Terraria;
@@ -11,10 +12,11 @@ namespace RecipeTree.Processes
 {
     class TreeBuilder
     {
-        public static List<(string, bool)> MakeTree(string itemToFind, Player player, int textSetting)
+        private static Random rng = new Random();
+        public static List<(string, bool)> MakeTextTree(string itemToFind, Player player, int textSetting)
         {
             // Dictionary to contain all possible recipes for one item -> {recipeOBJ: [(item name, stack size), ...], ...}
-            Dictionary<Recipe, List<(int, string, int)>> recipeItems = GetRecipes(itemToFind);
+            Dictionary<Recipe, List<Item>> recipeItems = GetRecipes(itemToFind);
 
             // String and bool tuple to store whether the player can craft the item currently
             List<(string, bool)> recipeStrings = new List<(string, bool)>();
@@ -27,14 +29,14 @@ namespace RecipeTree.Processes
             }
             else
             { 
-                // recipe = {recipeID: [(itemID, itemName, stackSize), ...]}
+                // recipe = {recipeID: [Item, ...]}
                 foreach (var recipe in recipeItems)
                 {
                     bool playerCanCraft = true;
                     foreach(var v in recipe.Value)
                     {
                         // Chekcs to see if the player has the required item in their inventory
-                        if (!ItemChecker.CheckInventory(player, v.Item2, v.Item3))
+                        if (!ItemChecker.CheckInventory(player, v.Name, v.stack))
                         {
                             // if the player doesn't have one of any of the required items, they cannot craft and therefore the loop breaks
                             playerCanCraft = false;
@@ -45,10 +47,10 @@ namespace RecipeTree.Processes
                     // Concatenate the item name and amount in each tuple of the recipe, uses textSetting to determine what the string displays
                     var strPairs = recipe.Value.Select(
                         p => (
-                            (textSetting < 3 ? p.Item2 : "") + 
-                            (textSetting != 2 ? $"[i/s{p.Item3}:{p.Item1}]" : "") + 
+                            (textSetting < 3 ? p.Name : "") + 
+                            (textSetting != 2 ? $"[i/s{p.stack}:{p.netID}]" : "") + 
                             (textSetting < 3 ? ": " : "") + 
-                            (textSetting < 3 ? p.Item3.ToString() : "")
+                            (textSetting < 3 ? p.stack.ToString() : "")
                         )
                     );
                     string recipeStr = String.Join(", ", strPairs);
@@ -59,10 +61,10 @@ namespace RecipeTree.Processes
             return recipeStrings;
         }
 
-        private static Dictionary<Recipe, List<(int, string, int)>> GetRecipes(string itemToFind)
+        private static Dictionary<Recipe, List<Item>> GetRecipes(string itemToFind)
         {
-            // Dictionary to contain all possible recipes for one item -> {recipeOBJ: [(item name, stack size), ...], ...}
-            Dictionary<Recipe, List<(int, string, int)>> recipeItems = new Dictionary<Recipe, List<(int, string, int)>>();
+            // Dictionary to contain all possible recipes for one item -> {recipeOBJ: [Item, ...], ...}
+            Dictionary<Recipe, List<Item>> recipeItems = new Dictionary<Recipe, List<Item>>();
 
             // Loop through all recipes and check whether the item is the result of the recipe
             for (int i = 0; i < Recipe.numRecipes; i++)
@@ -70,7 +72,7 @@ namespace RecipeTree.Processes
                 Recipe r = Main.recipe[i];
                 if (r.createItem.Name == itemToFind)
                 {
-                    List<(int, string, int)> tempList = new List<(int, string, int)>();
+                    List<Item> tempList = new List<Item>();
 
                     // loop through all the items in the recipe
                     foreach (Item it in r.requiredItem)
@@ -78,9 +80,7 @@ namespace RecipeTree.Processes
                         // Filter out any items with an id == 0, don't know why they are there
                         if (it.netID != 0)
                         {
-                            // Append the item's id, name and stack size to the list
-                            (int, string, int) recipeComponent = (it.netID, it.Name, it.stack);
-                            tempList.Add(recipeComponent);
+                            tempList.Add(it);
                         }
                     }
 
@@ -91,6 +91,54 @@ namespace RecipeTree.Processes
             }
 
             return recipeItems;
+        }
+
+        public static Dictionary<Item, List<Item>> GetAllRecipes(Dictionary<Item, List<Item>> recipeDict, Item parent)
+        {
+            var r = GetRecipes(parent.Name);
+            if (r.Count > 0)
+            {
+                recipeDict[parent] = new List<Item>();
+                var allRecipesList = new List<List<Item>>(r.Values);
+                int randRecipePos = rng.Next(0, allRecipesList.Count);
+                var randRecipe = allRecipesList[randRecipePos];
+                foreach (Item i in randRecipe)
+                {
+                    recipeDict[parent].Add(i);
+                }
+
+                foreach (Item ingredient in recipeDict[parent])
+                {
+                    if (recipeDict.ContainsKey(ingredient))
+                    {
+                        recipeDict.Remove(ingredient);
+                    }
+                    else
+                    {
+                        GetAllRecipes(recipeDict, ingredient);
+                    }
+                }
+            }
+
+            // Write json file
+            string json = "{";
+            foreach (Item k in recipeDict.Keys)
+            {
+                json += $"\"{k.Name}\":[";
+                foreach (Item v in recipeDict[k])
+                {
+                    json += $"\"{v.Name}\"";
+                    if (v != recipeDict[k][recipeDict[k].Count - 1])
+                    {
+                        json += ", ";
+                    }
+                }
+                json += "],";
+            }
+            json += "}";
+            Debug.WriteLine(json);
+
+            return recipeDict;
         }
 
     }
