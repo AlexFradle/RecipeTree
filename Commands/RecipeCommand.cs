@@ -51,18 +51,12 @@ namespace RecipeTree.Commands
             }
             else if (args[0] == "window")
             {
-                TreeWindow.ItemPanel.SetImg(ItemChecker.GetItemID(itemName));
-                Item item = ItemChecker.GetItemID(itemName);
-                var recipeDict = TreeBuilder.GetAllRecipes(new Dictionary<Item, List<Item>>(), item);
-                var tree = new TreeGenerator(item, recipeDict);
-                TreeWindow.TreePanel.Width.Set(TreeGenerator.areaWidth + 20f, 0f);
-                TreeWindow.TreePanel.Height.Set(TreeGenerator.areaHeight + 80f, 0f);
-                TreeWindow.TreeArea.Width.Set(TreeGenerator.areaWidth, 0f);
-                TreeWindow.TreeArea.Height.Set(TreeGenerator.areaHeight, 0f);
-                TreeWindow.CloseButton.Left.Set(TreeGenerator.areaWidth - 10, 0f);
-                TreeWindow.TreeArea.makeTree();
-                TreeWindow.Visible = true;
+                setRecipeWindow(itemName);
 
+            }
+            else if(args[0] == "flip")
+            {
+                TreeWindow.TreeArea.topDown = !TreeWindow.TreeArea.topDown;
             }
             else
             {
@@ -70,8 +64,22 @@ namespace RecipeTree.Commands
                 Item item = ItemChecker.GetItemID(itemName);
                 TreeBuilder.GetAllRecipes(rd, item);
             }
-            
-            
+        }
+
+        public static void setRecipeWindow(string itemName)
+        {
+            TreeWindow.ItemPanel.SetImg(ItemChecker.GetItemID(itemName));
+            Item item = ItemChecker.GetItemID(itemName);
+            var recipeDict = TreeBuilder.GetAllRecipes(new Dictionary<Item, List<Item>>(), item);
+            var tree = new TreeGenerator(item, recipeDict);
+            TreeWindow.TreePanel.Width.Set(TreeGenerator.areaWidth + 20f, 0f);
+            TreeWindow.TreePanel.Height.Set(TreeGenerator.areaHeight + 80f, 0f);
+            TreeWindow.TreeArea.Width.Set(TreeGenerator.areaWidth, 0f);
+            TreeWindow.TreeArea.Height.Set(TreeGenerator.areaHeight, 0f);
+            TreeWindow.CloseButton.Left.Set(TreeGenerator.areaWidth - 10, 0f);
+            TreeWindow.FlipButton.Left.Set(TreeGenerator.areaWidth - 22 - 20, 0f);
+            TreeWindow.TreeArea.makeTree();
+            TreeWindow.Visible = true;
         }
     }
 }

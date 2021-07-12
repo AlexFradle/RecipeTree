@@ -62,6 +62,7 @@ namespace RecipeTree.UI
         private List<ItemHolder> itemHolders = new List<ItemHolder>();
         public static List<BranchLine> branchLines;
         private UIImage branchImage;
+        public bool topDown = true;
 
         public void makeTree()
         {
@@ -89,12 +90,16 @@ namespace RecipeTree.UI
                         g.FillRectangle(p, r);
                     }
                 }
+                if (!topDown)
+                {
+                    b.RotateFlip(RotateFlipType.RotateNoneFlipY);
+                }
                 // b.Save(@"C:\Users\Alw\Documents\my games\Terraria\ModLoader\Mod Sources\RecipeTree\UI\bars.png", ImageFormat.Png);
                 using (MemoryStream s = new MemoryStream())
                 {
                     b.Save(s, ImageFormat.Png);
                     s.Seek(0, SeekOrigin.Begin);
-                    texture = Texture2D.FromStream(Main.graphics.GraphicsDevice, s);
+                    texture = Texture2D.FromStream(Main.instance.GraphicsDevice, s);
                 }
             }
             branchImage.SetImage(texture);
@@ -102,7 +107,7 @@ namespace RecipeTree.UI
 
         private void makeItemHolders(Node root)
         {
-            ItemHolder itemHolder = new ItemHolder();
+            ItemHolder itemHolder = new ItemHolder(true, root.parent != null ? false : true);
             itemHolder.SetPadding(0);
             itemHolder.Left.Set(root.x, 0f);
             itemHolder.Top.Set(root.y, 0f);
@@ -127,7 +132,8 @@ namespace RecipeTree.UI
                 var rect = ih.GetDimensions().ToRectangle();
                 if (rect.Contains(Main.mouseX, Main.mouseY))
                 {
-                    Main.hoverItemName = ih.CurrentItem.Name;
+                    Main.HoverItem = ih.CurrentItem.Clone();
+                    Main.hoverItemName = Main.HoverItem.Name;
                 }
             }
         }
@@ -175,6 +181,10 @@ namespace RecipeTree.UI
             areaHeight = (getMaxLevel(root) - 1) * (nodeHeight * 2) + nodeHeight;
             List<BranchLine> verticalLines = makeLines(root, new List<BranchLine>());
             TreeDisplayArea.branchLines.AddRange(verticalLines);
+            if (!TreeWindow.TreeArea.topDown)
+            {
+                applyRefelectionNode(root);
+            }
         }
 
         private Node generateTree(Node parent, Dictionary<Item, List<Item>> treeDict)
@@ -262,6 +272,15 @@ namespace RecipeTree.UI
                 makeLines(child, lines);
             }
             return lines;
+        }
+
+        public static void applyRefelectionNode(Node root)
+        {
+            root.y = (-root.y) + areaHeight - nodeHeight;
+            foreach (Node child in root.children)
+            {
+                applyRefelectionNode(child);
+            }
         }
 
         private Node setCoords(Node root)

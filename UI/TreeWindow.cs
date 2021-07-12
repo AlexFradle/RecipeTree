@@ -9,6 +9,7 @@ using Terraria.ModLoader;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 using Terraria.Localization;
+using RecipeTree.Commands;
 
 namespace RecipeTree.UI
 {
@@ -19,6 +20,8 @@ namespace RecipeTree.UI
         public static ItemHolder ItemPanel;
         public static TreeDisplayArea TreeArea;
         public static HoverImageButton CloseButton;
+        public static HoverImageButton FlipButton;
+        public static RecipeSearchBox SearchBox;
 
         public override void OnInitialize()
         {
@@ -57,6 +60,22 @@ namespace RecipeTree.UI
             CloseButton.OnClick += new MouseEvent(CloseButtonClicked);
             TreePanel.Append(CloseButton);
 
+            Texture2D flipButtonTexture = ModContent.GetTexture("Terraria/UI/ButtonSeed");
+            FlipButton = new HoverImageButton(flipButtonTexture, "Flip Tree");
+            FlipButton.Left.Set(TPWidth - 34 - 10, 0f);
+            FlipButton.Top.Set(10, 0f);
+            FlipButton.Width.Set(22, 0f);
+            FlipButton.Height.Set(22, 0f);
+            FlipButton.OnClick += new MouseEvent(FlipButtonClicked);
+            TreePanel.Append(FlipButton);
+
+            SearchBox = new RecipeSearchBox("Text");
+            SearchBox.Left.Set(70f, 0f);
+            SearchBox.Top.Set(10f, 0f);
+            SearchBox.Width.Set(200f, 0f);
+            SearchBox.Height.Set(50f, 0f);
+            TreePanel.Append(SearchBox);
+
             TreeArea = new TreeDisplayArea();
             TreeArea.SetPadding(0);
             TreeArea.Left.Set(10f, 0f);
@@ -71,6 +90,12 @@ namespace RecipeTree.UI
         {
             Main.PlaySound(SoundID.MenuClose);
             Visible = false;
+        }
+
+        private void FlipButtonClicked(UIMouseEvent evt, UIElement listeningElement)
+        {
+            TreeArea.topDown = !TreeArea.topDown;
+            RecipeCommand.setRecipeWindow(TreeGenerator.treeRoot.data.Name);
         }
     }
 }
