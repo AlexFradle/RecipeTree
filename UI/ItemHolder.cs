@@ -12,11 +12,12 @@ namespace RecipeTree.UI
     class ItemHolder : UIPanel
     {
         private UIImage itemImg = new UIImage(ModContent.GetTexture("Terraria/UI/ButtonDelete"));
-        private Item currentItem;
+        private Item _currentItem;
+        public Item CurrentItem => _currentItem;
 
         public void SetImg(Item newItem)
         {
-            currentItem = newItem;
+            _currentItem = newItem;
             itemImg.SetImage(Main.itemTexture[newItem.netID]);
         }
 
@@ -33,7 +34,7 @@ namespace RecipeTree.UI
             base.Draw(spriteBatch);
             if (IsMouseHovering)
             {
-                Main.hoverItemName = currentItem.Name;
+                Main.hoverItemName = _currentItem.Name;
             }
         }
     }

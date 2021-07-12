@@ -43,7 +43,7 @@ namespace RecipeTree.UI
             ItemPanel.Top.Set(10f, 0f);
             ItemPanel.Width.Set(50f, 0f);
             ItemPanel.Height.Set(50f, 0f);
-            ItemPanel.BackgroundColor = new Color(10, 29, 94);
+            ItemPanel.BackgroundColor = new Color(46, 60, 107);
             TreePanel.Append(ItemPanel);
 
 
@@ -61,7 +61,7 @@ namespace RecipeTree.UI
             TreeArea.SetPadding(0);
             TreeArea.Left.Set(10f, 0f);
             TreeArea.Top.Set(70f, 0f);
-            TreeArea.BackgroundColor = new Color(0, 255, 0);
+            TreeArea.BackgroundColor = new Color(46, 60, 107);
             TreePanel.Append(TreeArea);
 
             Append(TreePanel);

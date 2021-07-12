@@ -24,17 +24,32 @@ WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 800
 NODE_WIDTH = 50
 NODE_HEIGHT = 50
+MARGIN = 10
 
-recipes = {
-    "Ankh Shield": ["Ankh Charm", "Obsidian Shield"],
-    "Ankh Charm": ["Blindfold", "Armor Bracing", "Medicated Bandage", "Countercurse Mantra", "The Plan"],
-    "Armor Bracing": ["Armor Polish", "Vitamins"],
-    "Medicated Bandage": ["Adhesive Bandage", "Bezoar"],
-    "Countercurse Mantra": ["Nazar", "Megaphone"],
-    "The Plan": ["Trifold Map", "Fast Clock"],
-    "Obsidian Shield": ["Cobalt Shield", "Obsidian Skull"],
-    "Obsidian Skull": ["Obsidian"]
-}
+# recipes = {
+#     "Ankh Shield": ["Ankh Charm", "Obsidian Shield"],
+#     "Ankh Charm": ["Blindfold", "Armor Bracing", "Medicated Bandage", "Countercurse Mantra", "The Plan"],
+#     "Armor Bracing": ["Armor Polish", "Vitamins"],
+#     "Medicated Bandage": ["Adhesive Bandage", "Bezoar"],
+#     "Countercurse Mantra": ["Nazar", "Megaphone"],
+#     "The Plan": ["Trifold Map", "Fast Clock"],
+#     "Obsidian Shield": ["Cobalt Shield", "Obsidian Skull"],
+#     "Obsidian Skull": ["Obsidian"]
+# }
+# recipes = {
+#     "Ankh Shield":["Obsidian Shield", "Ankh Charm"],
+#     "Obsidian Shield":["Cobalt Shield", "Obsidian Skull"],
+#     "Obsidian Skull":["Obsidian"],
+#     "Ankh Charm": ["Armor Bracing", "Medicated Bandage", "The Plan", "Countercurse Mantra", "Blindfold"],
+#     "Armor Bracing":["Armor Polish", "Vitamins"],
+#     "Medicated Bandage":["Bezoar", "Adhesive Bandage"],
+#     "The Plan":["Fast Clock", "Trifold Map"],
+#     "Countercurse Mantra":["Megaphone", "Nazar"]
+# }
+
+recipes = {"Terra Blade":["True Night's Edge", "True Excalibur"],"True Night's Edge":["Night's Edge", "Broken Hero Sword"],"Night's Edge":["Blood Butcherer", "Muramasa", "Blade of Grass", "Fiery Greatsword"],"Blood Butcherer":["Crimtane Bar"],"Crimtane Bar":["Crimtane Ore"],"Blade of Grass":["Jungle Spores", "Stinger"],"Fiery Greatsword":["Hellstone Bar"],"Hellstone Bar":["Hellstone", "Obsidian"],"True Excalibur":["Excalibur", "Broken Hero Sword"],"Excalibur":["Hallowed Bar"],}
+
+root_name = "Terra Blade"
 
 
 def generate_tree(parent: Node, tree_dict: dict):
@@ -44,24 +59,12 @@ def generate_tree(parent: Node, tree_dict: dict):
     return parent
 
 
-def print_tree(n: Node):
+def draw_tree(n: Node):
     # Pre order
     for c in n.children:
         pygame.draw.rect(display, (0, 255, 0), c.rect)
         display.blit(f.render(c.data, True, (255, 255, 255)), c.rect)
-        print_tree(c)
-
-
-def BFS(root):
-    seen = [root]
-    q = [root]
-    while q:
-        v = q.pop(0)
-        for e in v.children:
-            if e not in seen:
-                seen.append(e)
-                q.append(e)
-    return seen
+        draw_tree(c)
 
 
 def set_levels(root, level):
@@ -85,11 +88,13 @@ def set_coords(root):
     # 2. Place the parents of the children and draw lines, ONLY IF ALL INGREDIENTS HAVE ALREADY BEEN PLACED
     # 3. Repeat 2
 
-    # List of tuples containing the end node and its level
+    # List of nodes that have no children
     end_nodes = get_end_nodes(root, [])
 
     # Calculate node spacing
     num_of_nodes = len(end_nodes)
+    min_area_width = ((num_of_nodes - 1) * MARGIN) + (num_of_nodes * NODE_WIDTH)
+    area_width = min_area_width# if min_area_width > area_width else area_width
     area_remainder = area_width - (NODE_WIDTH * num_of_nodes)
     inter_node_area = area_remainder / (num_of_nodes - 1)
 
@@ -101,6 +106,8 @@ def set_coords(root):
     # Create list to contain the current end nodes
     cur_nodes = end_nodes.copy()
 
+    h_lines = []
+
     # Loop until the root is reached
     while cur_nodes:
         rm_list = []  # Remove list
@@ -110,8 +117,18 @@ def set_coords(root):
             if cn.parent is not None:
                 # True if the current nodes parent has all of its ingredients on the top level
                 if set(cn.parent.children).issubset(cur_nodes) and cn not in rm_list:
+                    print(cn.rect.x, cn.rect.y, cn.data)
                     cn.parent.rect.x = cn.parent.children[0].rect.x + ((cn.parent.children[-1].rect.x - cn.parent.children[0].rect.x) / 2)
                     cn.parent.rect.y = cn.rect.y - (NODE_HEIGHT * 2)
+
+                    hl = Line(
+                        cn.parent.children[0].rect.centerx,
+                        cn.parent.children[0].rect.centery - NODE_HEIGHT,
+                        cn.parent.children[-1].rect.centerx,
+                        cn.parent.children[-1].rect.centery - NODE_HEIGHT
+                    )
+
+                    h_lines.append(hl)
 
                     # Schedule all of the parents children to be removed from the current list because their positions will have been set
                     for n in cn.parent.children:
@@ -133,25 +150,82 @@ def set_coords(root):
         for an in ap_list:
             cur_nodes.append(an)
 
-    return root
+    return root, h_lines
 
 
-def make_lines(root, lines):
+def make_lines_diagonal(root, ls):
     for child in root.children:
-        lines.append(Line(root.rect.centerx, root.rect.centery, child.rect.centerx, child.rect.centery))
-        make_lines(child, lines)
-    return lines
+        ls.append(Line(root.rect.centerx, root.rect.centery, child.rect.centerx, child.rect.centery))
+        make_lines_diagonal(child, ls)
+    return ls
 
 
-tree = generate_tree(Node(None, "Ankh Shield"), recipes)
+def make_lines_rectangular(root, ls):
+    if len(root.children) > 0:
+        ls.append(Line(
+            root.rect.centerx,
+            root.rect.y + NODE_HEIGHT,
+            root.rect.centerx,
+            root.rect.centery + NODE_HEIGHT
+        ))
+    for child in root.children:
+        ls.append(Line(
+            child.rect.centerx,
+            child.rect.y,
+            child.rect.centerx,
+            child.rect.centery - NODE_HEIGHT
+        ))
+        make_lines_rectangular(child, ls)
+    return ls
+
+
+def apply_reflection_node(root, max_height):
+    root.rect.y = (-root.rect.y) + max_height
+    for child in root.children:
+        apply_reflection_node(child, max_height)
+
+
+def apply_reflection_lines(ls, max_height):
+    for l in ls:
+        l.y1 = (-l.y1) + max_height
+        l.y2 = (-l.y2) + max_height
+
+
+def apply_scale(root, scale):
+    pass
+
+
+def BFS(root):
+    seen = [root]
+    q = [root]
+    max_lvl = 0
+    while q:
+        v = q.pop(0)
+        if v.level > max_lvl:
+            max_lvl = v.level
+        for e in v.children:
+            if e not in seen:
+                seen.append(e)
+                q.append(e)
+    return max_lvl
+
+
+tree = generate_tree(Node(None, root_name), recipes)
 tree.level = 1
 set_levels(tree, 2)
-root_node = set_coords(tree)
-lines = make_lines(root_node, [])
+root_node, horizontal_lines = set_coords(tree)
+lines = make_lines_rectangular(root_node, []) + horizontal_lines
+# lines = make_lines_diagonal(root_node, [])
+
+# apply_reflection_node(tree, 300)
+# apply_reflection_lines(lines, 300 + NODE_HEIGHT)
 
 display = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 clock = pygame.time.Clock()
 f = pygame.font.SysFont("Courier", 12, True)
+
+max_level = BFS(root_node)
+max_height = (max_level - 1) * (NODE_HEIGHT * 2)
 
 running = True
 while running:
@@ -162,11 +236,15 @@ while running:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 running = False
+            elif event.key == pygame.K_SPACE:
+                apply_reflection_node(tree, max_height)
+                apply_reflection_lines(lines, max_height + NODE_HEIGHT)
 
     display.fill((0, 0, 0))
 
     # Draw lines underneath the rects
     for l in lines:
+        print(l.y2 - l.y1)
         pygame.draw.aaline(display, (255, 255, 255), (l.x1, l.y1), (l.x2, l.y2))
 
     # Draw root node rect and text
@@ -174,7 +252,8 @@ while running:
     display.blit(f.render(root_node.data, True, (255, 255, 255)), root_node.rect)
 
     # Draw all children nodes
-    print_tree(root_node)
+    print("------------------------------")
+    draw_tree(root_node)
 
     pygame.display.update()
     clock.tick(60)

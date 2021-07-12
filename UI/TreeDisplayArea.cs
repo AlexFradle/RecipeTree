@@ -4,6 +4,7 @@ using System.Linq;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -11,6 +12,48 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
+using Microsoft.Win32;
+using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
+using ReLogic.Graphics;
+using ReLogic.Localization.IME;
+using ReLogic.OS;
+using ReLogic.Utilities;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using Terraria.Achievements;
+using Terraria.Audio;
+using Terraria.Chat;
+using Terraria.Cinematics;
+using Terraria.DataStructures;
+using Terraria.GameContent;
+using Terraria.GameContent.Achievements;
+using Terraria.GameContent.Events;
+using Terraria.GameContent.Liquid;
+using Terraria.GameContent.Skies;
+using Terraria.GameContent.Tile_Entities;
+using Terraria.GameContent.UI;
+using Terraria.GameContent.UI.Chat;
+using Terraria.GameContent.UI.States;
+using Terraria.GameInput;
+using Terraria.Graphics;
+using Terraria.Graphics.Capture;
+using Terraria.Graphics.Effects;
+using Terraria.Graphics.Shaders;
+using Terraria.Initializers;
+using Terraria.IO;
+using Terraria.Localization;
+using Terraria.Map;
+using Terraria.Net;
+using Terraria.ObjectData;
+using Terraria.Social;
+using Terraria.UI.Chat;
+using Terraria.UI.Gamepad;
+using Terraria.Utilities;
+using Terraria.World.Generation;
 
 namespace RecipeTree.UI
 {
@@ -18,29 +61,43 @@ namespace RecipeTree.UI
     {
         private List<ItemHolder> itemHolders = new List<ItemHolder>();
         public static List<BranchLine> branchLines;
+        private UIImage branchImage;
 
         public void makeTree()
         {
             this.RemoveAllChildren();
-            makeItemHolders(TreeGenerator.treeRoot);
+            itemHolders = new List<ItemHolder>();
+            branchImage = new UIImage(ModContent.GetTexture("RecipeTree/UI/bars"));
+            branchImage.Left.Set(0f, 0f);
+            branchImage.Top.Set(0f, 0f);
+            this.Append(branchImage);
             makeBranchImage();
+            makeItemHolders(TreeGenerator.treeRoot);
         }
 
         private void makeBranchImage()
         {
+            Texture2D texture = null;
             using (Bitmap b = new Bitmap(TreeGenerator.areaWidth, TreeGenerator.areaHeight))
             {
                 using (Graphics g = Graphics.FromImage(b))
                 {
-                    Pen p = new Pen(System.Drawing.Color.FromArgb(255, 0, 0));
+                    SolidBrush p = new SolidBrush(System.Drawing.Color.FromArgb(10, 29, 94));
                     foreach (BranchLine br in branchLines)
                     {
                         System.Drawing.Rectangle r = new System.Drawing.Rectangle(br.x, br.y, br.w, br.h);
-                        g.DrawRectangle(p, r);
+                        g.FillRectangle(p, r);
                     }
                 }
-                b.Save(@"C:\Users\Alw\Documents\my games\Terraria\ModLoader\Mod Sources\RecipeTree\UI\bars.png", ImageFormat.Png);
+                // b.Save(@"C:\Users\Alw\Documents\my games\Terraria\ModLoader\Mod Sources\RecipeTree\UI\bars.png", ImageFormat.Png);
+                using (MemoryStream s = new MemoryStream())
+                {
+                    b.Save(s, ImageFormat.Png);
+                    s.Seek(0, SeekOrigin.Begin);
+                    texture = Texture2D.FromStream(Main.graphics.GraphicsDevice, s);
+                }
             }
+            branchImage.SetImage(texture);
         }
 
         private void makeItemHolders(Node root)
@@ -59,6 +116,19 @@ namespace RecipeTree.UI
             foreach (Node child in root.children)
             {
                 makeItemHolders(child);
+            }
+        }
+
+        public override void Draw(SpriteBatch spriteBatch)
+        {
+            base.Draw(spriteBatch);
+            foreach (ItemHolder ih in itemHolders)
+            {
+                var rect = ih.GetDimensions().ToRectangle();
+                if (rect.Contains(Main.mouseX, Main.mouseY))
+                {
+                    Main.hoverItemName = ih.CurrentItem.Name;
+                }
             }
         }
     }
@@ -103,6 +173,8 @@ namespace RecipeTree.UI
             setLevels(root, 2);
             treeRoot = setCoords(root);
             areaHeight = (getMaxLevel(root) - 1) * (nodeHeight * 2) + nodeHeight;
+            List<BranchLine> verticalLines = makeLines(root, new List<BranchLine>());
+            TreeDisplayArea.branchLines.AddRange(verticalLines);
         }
 
         private Node generateTree(Node parent, Dictionary<Item, List<Item>> treeDict)
@@ -168,6 +240,30 @@ namespace RecipeTree.UI
             return max_lvl;
         }
 
+        private List<BranchLine> makeLines(Node root, List<BranchLine> lines)
+        {
+            if (root.children.Count > 0)
+            {
+                lines.Add(new BranchLine(
+                    (int)(root.CenterX - (branchThickness / 2)), 
+                    (int)(root.y + nodeHeight), 
+                    branchThickness, 
+                    (int)(nodeHeight / 2)
+                ));
+            }
+            foreach (Node child in root.children)
+            {
+                lines.Add(new BranchLine(
+                    (int)(child.CenterX - (branchThickness / 2)),
+                    (int)(child.CenterY - nodeHeight),
+                    branchThickness,
+                    (int)(nodeHeight / 2)
+                ));
+                makeLines(child, lines);
+            }
+            return lines;
+        }
+
         private Node setCoords(Node root)
         {
             // List of nodes that have no children
@@ -202,15 +298,17 @@ namespace RecipeTree.UI
                         HashSet<Node> nodeSet = new HashSet<Node>(cn.parent.children);
                         if (nodeSet.IsSubsetOf(curNodes) && (!rmList.Contains(cn)))
                         {
+                            Node firstChild = cn.parent.children[0];
                             Node endChild = cn.parent.children[cn.parent.children.Count - 1];
-                            cn.parent.x = cn.parent.children[0].x + ((endChild.x - cn.parent.children[0].x) / 2);
+                            cn.parent.x = firstChild.x + ((endChild.x - firstChild.x) / 2);
                             cn.parent.y = cn.y - (nodeHeight * 2);
 
-                            BranchLine hl = new BranchLine();
-                            hl.x = (int)cn.parent.children[0].CenterX;
-                            hl.y = (int)cn.parent.children[0].CenterY - nodeHeight;
-                            hl.w = (int)endChild.CenterX;
-                            hl.h = branchThickness;
+                            BranchLine hl = new BranchLine(
+                                (int)(firstChild.CenterX - (branchThickness / 2)),
+                                (int)(firstChild.CenterY - nodeHeight),
+                                (int)((endChild.CenterX - firstChild.CenterX) + (branchThickness / 2)),
+                                branchThickness
+                            );
 
                             horizontalLines.Add(hl);
 
@@ -241,6 +339,7 @@ namespace RecipeTree.UI
             TreeDisplayArea.branchLines = horizontalLines;
             return root;
         }
+
     }
 
     class BranchLine
@@ -249,5 +348,13 @@ namespace RecipeTree.UI
         public int y;
         public int w;
         public int h;
+
+        public BranchLine(int x, int y, int w, int h)
+        {
+            this.x = x;
+            this.y = y;
+            this.w = w;
+            this.h = h;
+        }
     }
 }
