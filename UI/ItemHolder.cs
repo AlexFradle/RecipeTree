@@ -14,7 +14,7 @@ namespace RecipeTree.UI
 {
     class ItemHolder : UIPanel
     {
-        private UIImage itemImg = new UIImage(ModContent.GetTexture("Terraria/UI/ButtonDelete"));
+        private UIImage itemImg = new UIImage(ModContent.GetTexture("Terraria/UI/ButtonSeed"));
         private Item _currentItem;
         private bool isPartOfTree;
         private bool isRootItem;
@@ -41,51 +41,54 @@ namespace RecipeTree.UI
         public override void Draw(SpriteBatch spriteBatch)
         {
             base.Draw(spriteBatch);
-            if (IsMouseHovering)
+            if (_currentItem != null)
             {
-                Main.hoverItemName = _currentItem.Name;
-            }
-            
-
-            if(_currentItem != null && isPartOfTree)
-            {
-                if (ItemChecker.CheckInventory(Main.LocalPlayer, _currentItem.Name, _currentItem.stack))
+                if (IsMouseHovering)
                 {
-                    this.BackgroundColor = new Color(10, 92, 10);
+                    Main.hoverItemName = _currentItem.Name;
                 }
-                else
-                {
-                    this.BackgroundColor = new Color(92, 10, 10);
-                }
-            }
 
-            if (isRootItem)
-            {
-                bool craftable = true;
-                foreach (Node n in TreeGenerator.treeRoot.children)
+
+                if (_currentItem != null && isPartOfTree)
                 {
-                    if (!ItemChecker.CheckInventory(Main.LocalPlayer, n.data.Name, n.data.stack))
+                    if (ItemChecker.CheckInventory(Main.LocalPlayer, _currentItem.Name, _currentItem.stack))
                     {
-                        craftable = false;
-                        colourFrameCount = 0;
-                        break;
+                        this.BackgroundColor = new Color(10, 92, 10);
+                    }
+                    else
+                    {
+                        this.BackgroundColor = new Color(92, 10, 10);
                     }
                 }
-                if (craftable)
-                {
-                    colourFrameCount = colourFrameCount > 60 ? 0 : colourFrameCount;
-                    float t = (float)colourFrameCount / 60;
-                    this.BackgroundColor = Color.Lerp(recipeCompleteStartColour, recipeCompleteEndColour, t);
-                    colourFrameCount += 1;
-                }
-            }
 
-            if (_currentItem.stack > 1)
-            {
-                CalculatedStyle innerDimensions = GetInnerDimensions();
-                float offsetX = innerDimensions.X;
-                float offsetY = innerDimensions.Y;
-                Utils.DrawBorderStringFourWay(spriteBatch, Main.fontItemStack, _currentItem.stack.ToString(), offsetX, offsetY + 40f, Color.White, Color.Black, new Vector2(0.3f));
+                if (isRootItem)
+                {
+                    bool craftable = true;
+                    foreach (Node n in TreeGenerator.treeRoot.children)
+                    {
+                        if (!ItemChecker.CheckInventory(Main.LocalPlayer, n.data.Name, n.data.stack))
+                        {
+                            craftable = false;
+                            colourFrameCount = 0;
+                            break;
+                        }
+                    }
+                    if (craftable)
+                    {
+                        colourFrameCount = colourFrameCount > 60 ? 0 : colourFrameCount;
+                        float t = (float)colourFrameCount / 60;
+                        this.BackgroundColor = Color.Lerp(recipeCompleteStartColour, recipeCompleteEndColour, t);
+                        colourFrameCount += 1;
+                    }
+                }
+
+                if (_currentItem.stack > 1)
+                {
+                    CalculatedStyle innerDimensions = GetInnerDimensions();
+                    float offsetX = innerDimensions.X;
+                    float offsetY = innerDimensions.Y;
+                    Utils.DrawBorderStringFourWay(spriteBatch, Main.fontItemStack, _currentItem.stack.ToString(), offsetX, offsetY + 40f, Color.White, Color.Black, new Vector2(0.3f));
+                }
             }
         }
     }

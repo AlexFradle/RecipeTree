@@ -36,7 +36,7 @@ namespace RecipeTree.Commands
                 // This isn't a great solution because no item name can start with the number 1, 2 or 3
                 if (args[1] != "1" && args[1] != "2" && args[1] != "3")
                 {
-                    List<(string, bool)> tree = TreeBuilder.MakeTextTree(itemName, caller.Player, setting);
+                    List<(string, bool)> tree = RecipeSearcher.MakeTextTree(itemName, caller.Player, setting);
                     caller.Reply("Recipes:", Color.White);
                     foreach (var pair in tree)
                     {
@@ -51,7 +51,10 @@ namespace RecipeTree.Commands
             }
             else if (args[0] == "window")
             {
-                setRecipeWindow(itemName);
+                if (!setRecipeWindow(itemName))
+                {
+                    caller.Reply($"Cannot find the item '{itemName}'", Color.Red);
+                }
 
             }
             else if(args[0] == "flip")
@@ -62,24 +65,37 @@ namespace RecipeTree.Commands
             {
                 var rd = new Dictionary<Item, List<Item>>();
                 Item item = ItemChecker.GetItemID(itemName);
-                TreeBuilder.GetAllRecipes(rd, item);
+                if (item != null)
+                {
+                    RecipeSearcher.GetAllRecipes(rd, item);
+                }
             }
         }
 
-        public static void setRecipeWindow(string itemName)
+        public static bool setRecipeWindow(string itemName)
         {
-            TreeWindow.ItemPanel.SetImg(ItemChecker.GetItemID(itemName));
             Item item = ItemChecker.GetItemID(itemName);
-            var recipeDict = TreeBuilder.GetAllRecipes(new Dictionary<Item, List<Item>>(), item);
-            var tree = new TreeGenerator(item, recipeDict);
-            TreeWindow.TreePanel.Width.Set(TreeGenerator.areaWidth + 20f, 0f);
-            TreeWindow.TreePanel.Height.Set(TreeGenerator.areaHeight + 80f, 0f);
-            TreeWindow.TreeArea.Width.Set(TreeGenerator.areaWidth, 0f);
-            TreeWindow.TreeArea.Height.Set(TreeGenerator.areaHeight, 0f);
-            TreeWindow.CloseButton.Left.Set(TreeGenerator.areaWidth - 10, 0f);
-            TreeWindow.FlipButton.Left.Set(TreeGenerator.areaWidth - 22 - 20, 0f);
-            TreeWindow.TreeArea.makeTree();
-            TreeWindow.Visible = true;
+            if (item != null)
+            {
+                var recipeDict = RecipeSearcher.GetAllRecipes(new Dictionary<Item, List<Item>>(), item);
+                if (recipeDict.Count > 0)
+                {
+                    TreeWindow.ItemPanel.SetImg(item);
+                    var tree = new TreeGenerator(item, recipeDict);
+                    float widthSpacing = (TreeGenerator.areaWidth + 20f) > 334f ? TreeGenerator.areaWidth + 20f : 334f;
+                    TreeWindow.TreePanel.Width.Set(widthSpacing, 0f);
+                    TreeWindow.TreePanel.Height.Set(TreeGenerator.areaHeight + 80f, 0f);
+                    TreeWindow.TreeArea.Width.Set(TreeGenerator.areaWidth, 0f);
+                    TreeWindow.TreeArea.Height.Set(TreeGenerator.areaHeight, 0f);
+                    TreeWindow.CloseButton.Left.Set(widthSpacing - 22 - 10, 0f);
+                    TreeWindow.FlipButton.Left.Set(widthSpacing - 44 - 20, 0f);
+                    TreeWindow.TreeArea.makeTree();
+                    TreeWindow.Visible = true;
+                    return true;
+                }
+            }
+            TreeWindow.SearchBox.BackgroundColor = new Color(255, 0, 0);
+            return false;
         }
     }
 }

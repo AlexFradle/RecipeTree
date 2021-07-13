@@ -10,7 +10,7 @@ using Terraria.ModLoader;
 
 namespace RecipeTree.Processes
 {
-    class TreeBuilder
+    class RecipeSearcher
     {
         private static Random rng = new Random();
         public static List<(string, bool)> MakeTextTree(string itemToFind, Player player, int textSetting)
@@ -61,7 +61,7 @@ namespace RecipeTree.Processes
             return recipeStrings;
         }
 
-        private static Dictionary<Recipe, List<Item>> GetRecipes(string itemToFind)
+        public static Dictionary<Recipe, List<Item>> GetRecipes(string itemToFind)
         {
             // Dictionary to contain all possible recipes for one item -> {recipeOBJ: [Item, ...], ...}
             Dictionary<Recipe, List<Item>> recipeItems = new Dictionary<Recipe, List<Item>>();
@@ -72,24 +72,16 @@ namespace RecipeTree.Processes
                 Recipe r = Main.recipe[i];
                 if (r.createItem.Name == itemToFind)
                 {
-                    List<Item> tempList = new List<Item>();
+                    List<Item> arr = (from item in r.requiredItem
+                                      where !item.Name.Split(' ').Any(a => a == "Wall" || a == "Platform" || a == "Fence") && item.netID != 0
+                                      select item).ToList();
 
-                    // loop through all the items in the recipe
-                    foreach (Item it in r.requiredItem)
+                    if (arr.Count > 0)
                     {
-                        // Filter out any items with an id == 0, don't know why they are there
-                        if (it.netID != 0)
-                        {
-                            tempList.Add(it);
-                        }
+                        recipeItems[r] = arr;
                     }
-
-                    // Set the key-value pair of the recipe and the required items in the recipeItems dictionary
-                    recipeItems[r] = tempList;
                 }
-
             }
-
             return recipeItems;
         }
 

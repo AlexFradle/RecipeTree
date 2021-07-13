@@ -10,6 +10,7 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 using Terraria.Localization;
 using RecipeTree.Commands;
+using RecipeTree.Processes;
 
 namespace RecipeTree.UI
 {
@@ -30,8 +31,8 @@ namespace RecipeTree.UI
 
             float TPLeft = 400;
             float TPTop = 100;
-            float TPWidth = 500;
-            float TPHeight = 500;
+            float TPWidth = 334;
+            float TPHeight = 100;
 
             TreePanel.Left.Set(TPLeft, 0f);
             TreePanel.Top.Set(TPTop, 0f);
@@ -51,7 +52,8 @@ namespace RecipeTree.UI
 
 
             // image is 22s22
-            Texture2D closeButtonTexture = ModContent.GetTexture("Terraria/UI/ButtonDelete");
+            // Texture2D closeButtonTexture = ModContent.GetTexture("Terraria/UI/ButtonDelete");
+            Texture2D closeButtonTexture = ModContent.GetTexture("RecipeTree/UI/exit");
             CloseButton = new HoverImageButton(closeButtonTexture, Language.GetTextValue("LegacyInterface.52"));
             CloseButton.Left.Set(TPWidth - 22 - 10, 0f);
             CloseButton.Top.Set(10, 0f);
@@ -60,16 +62,17 @@ namespace RecipeTree.UI
             CloseButton.OnClick += new MouseEvent(CloseButtonClicked);
             TreePanel.Append(CloseButton);
 
-            Texture2D flipButtonTexture = ModContent.GetTexture("Terraria/UI/ButtonSeed");
+            // Texture2D flipButtonTexture = ModContent.GetTexture("Terraria/UI/ButtonSeed");
+            Texture2D flipButtonTexture = ModContent.GetTexture("RecipeTree/UI/flip");
             FlipButton = new HoverImageButton(flipButtonTexture, "Flip Tree");
-            FlipButton.Left.Set(TPWidth - 34 - 10, 0f);
+            FlipButton.Left.Set(TPWidth - 44 - 20, 0f);
             FlipButton.Top.Set(10, 0f);
             FlipButton.Width.Set(22, 0f);
             FlipButton.Height.Set(22, 0f);
             FlipButton.OnClick += new MouseEvent(FlipButtonClicked);
             TreePanel.Append(FlipButton);
 
-            SearchBox = new RecipeSearchBox("Text");
+            SearchBox = new RecipeSearchBox("");
             SearchBox.Left.Set(70f, 0f);
             SearchBox.Top.Set(10f, 0f);
             SearchBox.Width.Set(200f, 0f);
@@ -95,7 +98,12 @@ namespace RecipeTree.UI
         private void FlipButtonClicked(UIMouseEvent evt, UIElement listeningElement)
         {
             TreeArea.topDown = !TreeArea.topDown;
-            RecipeCommand.setRecipeWindow(TreeGenerator.treeRoot.data.Name);
+
+            // Remove non alaphanumeric characters
+            char[] arr = TreeGenerator.treeRoot.data.Name.Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c)).ToArray();
+            string itemName = new string(arr);
+
+            RecipeCommand.setRecipeWindow(itemName);
         }
     }
 }

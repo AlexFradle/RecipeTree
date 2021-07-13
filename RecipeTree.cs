@@ -21,6 +21,7 @@ namespace RecipeTree
 	{
 		private UserInterface TreeUserInterface;
 		internal TreeWindow TreeWindow;
+        public static ModHotKey ToggleRecipeTreeHotKey;
 
         public override void Load()
         {
@@ -30,11 +31,18 @@ namespace RecipeTree
                 TreeWindow.Activate();
                 TreeUserInterface = new UserInterface();
                 TreeUserInterface.SetState(TreeWindow);
+
+                ToggleRecipeTreeHotKey = RegisterHotKey("Toggle Recipe Tree Window", "P");
             }
         }
 
         public override void UpdateUI(GameTime gameTime)
         {
+            if (ToggleRecipeTreeHotKey.JustPressed)
+            {
+                TreeWindow.Visible = !TreeWindow.Visible;
+            }
+
             if (TreeWindow.Visible)
             {
                 TreeUserInterface?.Update(gameTime);
