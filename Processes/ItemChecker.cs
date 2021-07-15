@@ -58,7 +58,6 @@ namespace RecipeTree.Processes
             // 1. Remove all spaces (whitespace) from the input string
             // 2. Check if the field with the requested string exists
             // 3. If it does exist, get the value of the field using the GetField and GetValue methods
-
             Item item = new Item();
             string itemName = String.Concat(itemStr.Where(x => !Char.IsWhiteSpace(x)));
             if (typeof(ItemID).GetField(itemName) != null)
@@ -69,6 +68,16 @@ namespace RecipeTree.Processes
                 return item;
             }
             //----------------------------------------------------------------------------------------------------------------------------------------------------------------
+            
+            foreach (Mod m in ModLoader.Mods)
+            {
+                if (m.GetItem(itemName) != null)
+                {
+                    Item mItem = m.GetItem(itemName).item.Clone();
+                    item.SetDefaults(mItem.type, false);
+                    return item;
+                } 
+            }
             return null;
         }
     }

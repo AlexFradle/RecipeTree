@@ -80,7 +80,7 @@ namespace RecipeTree.Commands
                 var recipeDict = RecipeSearcher.GetAllRecipes(new Dictionary<Item, List<Item>>(), item);
                 if (recipeDict.Count > 0)
                 {
-                    TreeWindow.ItemPanel.SetImg(item);
+                    TreeWindow.ItemPanel.SetItem(item);
                     var tree = new TreeGenerator(item, recipeDict);
                     float widthSpacing = (TreeGenerator.areaWidth + 20f) > 366f ? TreeGenerator.areaWidth + 20f : 366f;
                     TreeWindow.TreePanel.Width.Set(widthSpacing, 0f);

@@ -44,7 +44,7 @@ namespace RecipeTree.UI
             TreePanel.Height.Set(TPHeight, 0f);
             TreePanel.BackgroundColor = new Color(73, 94, 171);
 
-            ItemPanel = new ItemHolder();
+            ItemPanel = new ItemHolder(10f, 10f);
             ItemPanel.SetPadding(0);
 
             ItemPanel.Left.Set(10f, 0f);

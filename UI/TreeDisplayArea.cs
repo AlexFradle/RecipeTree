@@ -69,7 +69,7 @@ namespace RecipeTree.UI
 
         private void makeItemHolders(Node root)
         {
-            ItemHolder itemHolder = new ItemHolder(true, root.parent != null ? false : true);
+            ItemHolder itemHolder = new ItemHolder(root.x, root.y, true, root.parent != null ? false : true);
             itemHolder.SetPadding(0);
             itemHolder.Left.Set(root.x, 0f);
             itemHolder.Top.Set(root.y, 0f);
@@ -80,7 +80,7 @@ namespace RecipeTree.UI
             Item itemHolderItem = root.data.Clone();
             itemHolderItem.stack = (int)Math.Ceiling(root.itemStack);
             itemHolder.itemStack = root.itemStack;
-            itemHolder.SetImg(itemHolderItem);
+            itemHolder.SetItem(itemHolderItem);
             itemHolders.Add(itemHolder);
             this.Append(itemHolder);
 
@@ -98,8 +98,9 @@ namespace RecipeTree.UI
                 var rect = ih.GetDimensions().ToRectangle();
                 if (rect.Contains(Main.mouseX, Main.mouseY))
                 {
+                    Main.hoverItemName = ih.CurrentItem.Name;
                     Main.HoverItem = ih.CurrentItem.Clone();
-                    Main.hoverItemName = Main.HoverItem.Name;
+                    //Main.hoverItemName = Main.HoverItem.Name;
                     if (Main.mouseLeft)
                     {
                         // Remove non alaphanumeric characters
@@ -107,6 +108,7 @@ namespace RecipeTree.UI
                         string itemName = new string(arr);
 
                         RecipeCommand.setRecipeWindow(itemName);
+                        Main.mouseLeft = false;
                     }
                 }
             }
