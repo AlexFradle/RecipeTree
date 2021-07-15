@@ -22,7 +22,11 @@ namespace RecipeTree.UI
         public static TreeDisplayArea TreeArea;
         public static HoverImageButton CloseButton;
         public static HoverImageButton FlipButton;
+        public static HoverImageButton FilterUpButton;
+        public static HoverImageButton FilterDownButton;
         public static RecipeSearchBox SearchBox;
+        public static int TreeDepth = 2;
+        public static int MaxDepth = 8;
 
         public override void OnInitialize()
         {
@@ -31,7 +35,7 @@ namespace RecipeTree.UI
 
             float TPLeft = 400;
             float TPTop = 100;
-            float TPWidth = 334;
+            float TPWidth = 366;
             float TPHeight = 100;
 
             TreePanel.Left.Set(TPLeft, 0f);
@@ -72,6 +76,24 @@ namespace RecipeTree.UI
             FlipButton.OnClick += new MouseEvent(FlipButtonClicked);
             TreePanel.Append(FlipButton);
 
+            Texture2D upButtonTexture = ModContent.GetTexture("RecipeTree/UI/up_arrow");
+            FilterUpButton = new HoverImageButton(upButtonTexture, "Increase Tree Depth: 2");
+            FilterUpButton.Left.Set(TPWidth - 66 - 30, 0f);
+            FilterUpButton.Top.Set(10, 0f);
+            FilterUpButton.Width.Set(22, 0f);
+            FilterUpButton.Height.Set(22, 0f);
+            FilterUpButton.OnClick += new MouseEvent(UpButtonClicked);
+            TreePanel.Append(FilterUpButton);
+
+            Texture2D downButtonTexture = ModContent.GetTexture("RecipeTree/UI/down_arrow");
+            FilterDownButton = new HoverImageButton(downButtonTexture, "Decrease Tree Depth: 2");
+            FilterDownButton.Left.Set(TPWidth - 66 - 30, 0f);
+            FilterDownButton.Top.Set(38, 0f);
+            FilterDownButton.Width.Set(22, 0f);
+            FilterDownButton.Height.Set(22, 0f);
+            FilterDownButton.OnClick += new MouseEvent(DownButtonClicked);
+            TreePanel.Append(FilterDownButton);
+
             SearchBox = new RecipeSearchBox("");
             SearchBox.Left.Set(70f, 0f);
             SearchBox.Top.Set(10f, 0f);
@@ -89,6 +111,15 @@ namespace RecipeTree.UI
             Append(TreePanel);
         }
 
+        private void RefreshRecipeWindow()
+        {
+            // Remove non alaphanumeric characters
+            char[] arr = TreeGenerator.treeRoot.data.Name.Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c)).ToArray();
+            string itemName = new string(arr);
+
+            RecipeCommand.setRecipeWindow(itemName);
+        }
+
         private void CloseButtonClicked(UIMouseEvent evt, UIElement listeningElement)
         {
             Main.PlaySound(SoundID.MenuClose);
@@ -98,12 +129,26 @@ namespace RecipeTree.UI
         private void FlipButtonClicked(UIMouseEvent evt, UIElement listeningElement)
         {
             TreeArea.topDown = !TreeArea.topDown;
+            RefreshRecipeWindow();
+        }
 
-            // Remove non alaphanumeric characters
-            char[] arr = TreeGenerator.treeRoot.data.Name.Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c)).ToArray();
-            string itemName = new string(arr);
+        private void UpButtonClicked(UIMouseEvent evt, UIElement listeningElement)
+        {
+            //if (TreeDepth + 1 )
+            //{
 
-            RecipeCommand.setRecipeWindow(itemName);
+            //}
+            TreeDepth += 1;
+            RefreshRecipeWindow();
+        }
+
+        private void DownButtonClicked(UIMouseEvent evt, UIElement listeningElement)
+        {
+            if (TreeDepth - 1 >= 2)
+            {
+                TreeDepth -= 1;
+                RefreshRecipeWindow();
+            }
         }
     }
 }

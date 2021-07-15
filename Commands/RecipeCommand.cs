@@ -82,13 +82,17 @@ namespace RecipeTree.Commands
                 {
                     TreeWindow.ItemPanel.SetImg(item);
                     var tree = new TreeGenerator(item, recipeDict);
-                    float widthSpacing = (TreeGenerator.areaWidth + 20f) > 334f ? TreeGenerator.areaWidth + 20f : 334f;
+                    float widthSpacing = (TreeGenerator.areaWidth + 20f) > 366f ? TreeGenerator.areaWidth + 20f : 366f;
                     TreeWindow.TreePanel.Width.Set(widthSpacing, 0f);
                     TreeWindow.TreePanel.Height.Set(TreeGenerator.areaHeight + 80f, 0f);
                     TreeWindow.TreeArea.Width.Set(TreeGenerator.areaWidth, 0f);
                     TreeWindow.TreeArea.Height.Set(TreeGenerator.areaHeight, 0f);
                     TreeWindow.CloseButton.Left.Set(widthSpacing - 22 - 10, 0f);
                     TreeWindow.FlipButton.Left.Set(widthSpacing - 44 - 20, 0f);
+                    TreeWindow.FilterUpButton.Left.Set(widthSpacing - 66 - 30, 0f);
+                    TreeWindow.FilterUpButton.HoverText = $"Increase Tree Depth: {TreeWindow.TreeDepth}";
+                    TreeWindow.FilterDownButton.Left.Set(widthSpacing - 66 - 30, 0f);
+                    TreeWindow.FilterDownButton.HoverText = $"Decrease Tree Depth: {TreeWindow.TreeDepth}";
                     TreeWindow.TreeArea.makeTree();
                     TreeWindow.Visible = true;
                     return true;

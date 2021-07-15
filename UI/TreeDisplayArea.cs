@@ -10,10 +10,12 @@ using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
+using Terraria.GameInput;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using RecipeTree.Processes;
+using RecipeTree.Commands;
 
 namespace RecipeTree.UI
 {
@@ -76,7 +78,8 @@ namespace RecipeTree.UI
             itemHolder.BackgroundColor = new Microsoft.Xna.Framework.Color(10, 29, 94);
             // Clone node item and assign itemStack to its stack field
             Item itemHolderItem = root.data.Clone();
-            itemHolderItem.stack = root.itemStack;
+            itemHolderItem.stack = (int)Math.Ceiling(root.itemStack);
+            itemHolder.itemStack = root.itemStack;
             itemHolder.SetImg(itemHolderItem);
             itemHolders.Add(itemHolder);
             this.Append(itemHolder);
@@ -97,6 +100,14 @@ namespace RecipeTree.UI
                 {
                     Main.HoverItem = ih.CurrentItem.Clone();
                     Main.hoverItemName = Main.HoverItem.Name;
+                    if (Main.mouseLeft)
+                    {
+                        // Remove non alaphanumeric characters
+                        char[] arr = ih.CurrentItem.Name.Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c)).ToArray();
+                        string itemName = new string(arr);
+
+                        RecipeCommand.setRecipeWindow(itemName);
+                    }
                 }
             }
         }

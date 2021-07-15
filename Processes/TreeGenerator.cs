@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -16,7 +17,7 @@ namespace RecipeTree.Processes
         public int level;
         public float x;
         public float y;
-        public int itemStack;
+        public float itemStack;
 
         public float CenterX => this.x + (TreeGenerator.nodeWidth / 2);
         public float CenterY => this.y + (TreeGenerator.nodeHeight / 2);
@@ -74,10 +75,17 @@ namespace RecipeTree.Processes
 
         private void setLevels(Node root, int level)
         {
-            foreach (Node child in root.children)
+            if (level > TreeWindow.TreeDepth)
             {
-                child.level = level;
-                setLevels(child, level + 1);
+                root.children.Clear();
+            }
+            else
+            {
+                foreach (Node child in root.children)
+                {
+                    child.level = level;
+                    setLevels(child, level + 1);
+                }
             }
         }
 
@@ -159,7 +167,7 @@ namespace RecipeTree.Processes
                                   select kv.Key).ToList()[0].createItem;
                 foreach (Node child in root.children)
                 {
-                    child.itemStack = (int)(((float)child.data.stack / (float)rootRecipe.stack) * root.itemStack);
+                    child.itemStack = ((float)child.data.stack / (float)rootRecipe.stack) * root.itemStack;
                     sumStackAmounts(child, recipeDict);
                 }
             }

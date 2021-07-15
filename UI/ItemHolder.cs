@@ -9,6 +9,7 @@ using Terraria.UI;
 using Terraria.GameContent.UI.Elements;
 using Terraria.ModLoader;
 using RecipeTree.Processes;
+using RecipeTree.Commands;
 
 namespace RecipeTree.UI
 {
@@ -21,6 +22,7 @@ namespace RecipeTree.UI
         private Color recipeCompleteEndColour = new Color(77, 46, 0);
         private Color recipeCompleteStartColour = new Color(255, 153, 0);
         private int colourFrameCount = 0;
+        public float itemStack = 1f;
         public Item CurrentItem => _currentItem;
 
         public void SetImg(Item newItem)
@@ -82,28 +84,14 @@ namespace RecipeTree.UI
                     }
                 }
 
-                if (_currentItem.stack > 1)
+                if (itemStack > 1)
                 {
                     CalculatedStyle innerDimensions = GetInnerDimensions();
                     float offsetX = innerDimensions.X;
                     float offsetY = innerDimensions.Y;
-                    Utils.DrawBorderStringFourWay(spriteBatch, Main.fontItemStack, _currentItem.stack.ToString(), offsetX, offsetY + 40f, Color.White, Color.Black, new Vector2(0.3f));
+                    Utils.DrawBorderStringFourWay(spriteBatch, Main.fontItemStack, itemStack.ToString(), offsetX, offsetY + 40f, Color.White, Color.Black, new Vector2(0.3f));
                 }
             }
-        }
-    }
-
-    class ItemHolderText : UIElement
-    {
-        private string text;
-        public ItemHolderText(string text)
-        {
-            this.text = text;
-        }
-
-        protected override void DrawSelf(SpriteBatch spriteBatch)
-        {
-            CalculatedStyle innerDimensions = GetInnerDimensions();
         }
     }
 }

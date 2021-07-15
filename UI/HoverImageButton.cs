@@ -9,7 +9,7 @@ namespace RecipeTree.UI
 {
     class HoverImageButton : UIImageButton
     {
-        internal string HoverText;
+        public string HoverText;
 
         public HoverImageButton(Texture2D texture, string hoverText) : base(texture)
         {

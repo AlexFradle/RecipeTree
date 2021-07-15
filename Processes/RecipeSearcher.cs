@@ -90,10 +90,20 @@ namespace RecipeTree.Processes
             var r = GetRecipes(parent.Name);
             if (r.Count > 0)
             {
-                recipeDict[parent] = new List<Item>();
                 var allRecipesList = new List<List<Item>>(r.Values);
                 int randRecipePos = rng.Next(0, allRecipesList.Count);
                 var randRecipe = allRecipesList[randRecipePos];
+
+                // Sets the correct stack amount to the root iten
+                if (recipeDict.Count == 0)
+                {
+                    var reversed = r.ToDictionary(x => x.Value, x => x.Key);
+                    var correctItem = reversed[randRecipe].createItem;
+                    parent.stack = correctItem.stack;
+                }
+
+                recipeDict[parent] = new List<Item>();
+
                 foreach (Item i in randRecipe)
                 {
                     recipeDict[parent].Add(i);
