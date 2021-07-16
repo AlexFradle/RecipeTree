@@ -62,7 +62,7 @@ namespace RecipeTree.UI
 
                 Vector2 drawPos = new Vector2(
                     TreeWindow.TreePanel.Left.Pixels + (isPartOfTree ? TreeWindow.TreeArea.Left.Pixels : 0) + x, 
-                    TreeWindow.TreePanel.Top.Pixels + (isPartOfTree ? TreeWindow.TreeArea.Top.Pixels : 0) + y
+                    TreeWindow.TreePanel.Top.Pixels + (isPartOfTree ? TreeWindow.TreeList.Top.Pixels : 0) + y
                 );
 
                 float sf = 1f;

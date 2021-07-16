@@ -25,6 +25,7 @@ namespace RecipeTree.UI
         public static HoverImageButton FilterUpButton;
         public static HoverImageButton FilterDownButton;
         public static RecipeSearchBox SearchBox;
+        public static TreeContainerList TreeList;
         public static int TreeDepth = 2;
         public static int MaxDepth = 8;
 
@@ -101,12 +102,18 @@ namespace RecipeTree.UI
             SearchBox.Height.Set(50f, 0f);
             TreePanel.Append(SearchBox);
 
+            TreeList = new TreeContainerList();
+            TreeList.ListPadding = 0f;
+            TreeList.Left.Set(0f, 0f);
+            TreeList.Top.Set(70f, 0f);
+            TreePanel.Append(TreeList);
+
             TreeArea = new TreeDisplayArea();
             TreeArea.SetPadding(0);
             TreeArea.Left.Set(10f, 0f);
             TreeArea.Top.Set(70f, 0f);
             TreeArea.BackgroundColor = new Color(46, 60, 107);
-            TreePanel.Append(TreeArea);
+            TreeList.Add(TreeArea);
 
             Append(TreePanel);
         }

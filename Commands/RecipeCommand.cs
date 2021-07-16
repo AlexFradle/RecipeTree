@@ -80,11 +80,16 @@ namespace RecipeTree.Commands
                 var recipeDict = RecipeSearcher.GetAllRecipes(new Dictionary<Item, List<Item>>(), item);
                 if (recipeDict.Count > 0)
                 {
+                    float maxWidth = 1000f;
                     TreeWindow.ItemPanel.SetItem(item);
                     var tree = new TreeGenerator(item, recipeDict);
                     float widthSpacing = (TreeGenerator.areaWidth + 20f) > 366f ? TreeGenerator.areaWidth + 20f : 366f;
+                    widthSpacing = widthSpacing > maxWidth ? maxWidth : widthSpacing;
                     TreeWindow.TreePanel.Width.Set(widthSpacing, 0f);
                     TreeWindow.TreePanel.Height.Set(TreeGenerator.areaHeight + 80f, 0f);
+                    TreeWindow.TreeList.Width.Set(widthSpacing - 10, 0f);
+                    TreeWindow.TreeList.Height.Set(TreeGenerator.areaHeight, 0f);
+                    TreeWindow.TreeArea.MaxWidth.Set(TreeGenerator.areaWidth, 0f);
                     TreeWindow.TreeArea.Width.Set(TreeGenerator.areaWidth, 0f);
                     TreeWindow.TreeArea.Height.Set(TreeGenerator.areaHeight, 0f);
                     TreeWindow.CloseButton.Left.Set(widthSpacing - 22 - 10, 0f);
