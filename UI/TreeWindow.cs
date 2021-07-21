@@ -26,6 +26,7 @@ namespace RecipeTree.UI
         public static HoverImageButton FilterDownButton;
         public static RecipeSearchBox SearchBox;
         public static TreeContainerList TreeList;
+        public static SearchDropDown DropDownList;
         public static int TreeDepth = 2;
         public static int MaxDepth = 8;
 
@@ -67,7 +68,6 @@ namespace RecipeTree.UI
             CloseButton.OnClick += new MouseEvent(CloseButtonClicked);
             TreePanel.Append(CloseButton);
 
-            // Texture2D flipButtonTexture = ModContent.GetTexture("Terraria/UI/ButtonSeed");
             Texture2D flipButtonTexture = ModContent.GetTexture("RecipeTree/UI/flip");
             FlipButton = new HoverImageButton(flipButtonTexture, "Flip Tree");
             FlipButton.Left.Set(TPWidth - 44 - 20, 0f);
@@ -115,16 +115,20 @@ namespace RecipeTree.UI
             TreeArea.BackgroundColor = new Color(46, 60, 107);
             TreeList.Add(TreeArea);
 
+            DropDownList = new SearchDropDown();
+            DropDownList.ListPadding = 0f;
+            DropDownList.Left.Set(70f, 0f);
+            DropDownList.Top.Set(60f, 0f);
+            DropDownList.Width.Set(200f, 0f);
+            DropDownList.Height.Set(250f, 0f);
+            TreePanel.Append(DropDownList);
+
             Append(TreePanel);
         }
 
         private void RefreshRecipeWindow()
         {
-            // Remove non alaphanumeric characters
-            char[] arr = TreeGenerator.treeRoot.data.Name.Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c)).ToArray();
-            string itemName = new string(arr);
-
-            RecipeCommand.setRecipeWindow(itemName);
+            RecipeCommand.setRecipeWindow(TreeGenerator.treeRoot.data.Name);
         }
 
         private void CloseButtonClicked(UIMouseEvent evt, UIElement listeningElement)

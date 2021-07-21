@@ -14,6 +14,7 @@ using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.UI;
 using RecipeTree.UI;
+using RecipeTree.Processes;
 
 namespace RecipeTree
 {

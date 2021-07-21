@@ -12,6 +12,7 @@ using Terraria.GameContent.UI.Elements;
 using Terraria.UI;
 using Terraria.Localization;
 using RecipeTree.Commands;
+using RecipeTree.Processes;
 
 namespace RecipeTree.UI
 {
@@ -39,6 +40,7 @@ namespace RecipeTree.UI
             {
                 Main.clrInput();
                 focused = true;
+                TreeWindow.DropDownList.visible = true;
                 Main.blockInput = true;
                 this.BackgroundColor = new Color(46, 60, 107);
             }
@@ -49,6 +51,7 @@ namespace RecipeTree.UI
             if (focused)
             {
                 focused = false;
+                TreeWindow.DropDownList.visible = false;
                 Main.blockInput = false;
                 this.BackgroundColor = originalColour;
             }
@@ -76,9 +79,23 @@ namespace RecipeTree.UI
                 Terraria.GameInput.PlayerInput.WritingText = true;
                 Main.instance.HandleIME();
                 string newString = Main.GetInputText(currentString);
+                if (newString != currentString && currentString != null)
+                {
+                    TreeWindow.DropDownList.Clear();
+                    List<string> suggestedWords = ItemChecker.GetClosestMatches(currentString);
+                    foreach (string word in suggestedWords)
+                    {
+                        UITextPanel<string> button = new UITextPanel<string>(word);
+                        button.OnClick += (a, b) => {
+                            currentString = word;
+                            RecipeCommand.setRecipeWindow(word);
+                        };
+                        TreeWindow.DropDownList.Add(button);
+                    }
+                }
                 currentString = newString;
                 this.SetText(currentString, 1f, false);
-
+                
                 if (JustPressed(Keys.Enter))
                 {
                     Main.drawingPlayerChat = false;

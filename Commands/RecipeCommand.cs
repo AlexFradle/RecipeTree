@@ -89,6 +89,8 @@ namespace RecipeTree.Commands
                     TreeWindow.TreePanel.Height.Set(TreeGenerator.areaHeight + 80f, 0f);
                     TreeWindow.TreeList.Width.Set(widthSpacing - 10, 0f);
                     TreeWindow.TreeList.Height.Set(TreeGenerator.areaHeight, 0f);
+                    TreeWindow.TreeArea.Left.Set(10f, 0f);
+                    TreeWindow.TreeArea.Top.Set(70f, 0f);
                     TreeWindow.TreeArea.MaxWidth.Set(TreeGenerator.areaWidth, 0f);
                     TreeWindow.TreeArea.Width.Set(TreeGenerator.areaWidth, 0f);
                     TreeWindow.TreeArea.Height.Set(TreeGenerator.areaHeight, 0f);

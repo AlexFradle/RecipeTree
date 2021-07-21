@@ -96,18 +96,14 @@ namespace RecipeTree.UI
             foreach (ItemHolder ih in itemHolders)
             {
                 var rect = ih.GetDimensions().ToRectangle();
-                if (rect.Contains(Main.mouseX, Main.mouseY))
+                if (rect.Contains(Main.mouseX, Main.mouseY) && Main.mouseX > TreeWindow.TreePanel.Left.Pixels && Main.mouseX < TreeWindow.TreePanel.Left.Pixels + TreeWindow.TreePanel.Width.Pixels)
                 {
                     Main.hoverItemName = ih.CurrentItem.Name;
                     Main.HoverItem = ih.CurrentItem.Clone();
                     //Main.hoverItemName = Main.HoverItem.Name;
                     if (Main.mouseLeft)
                     {
-                        // Remove non alaphanumeric characters
-                        char[] arr = ih.CurrentItem.Name.Where(c => char.IsLetterOrDigit(c) || char.IsWhiteSpace(c)).ToArray();
-                        string itemName = new string(arr);
-
-                        RecipeCommand.setRecipeWindow(itemName);
+                        RecipeCommand.setRecipeWindow(ih.CurrentItem.Name);
                         Main.mouseLeft = false;
                     }
                 }
